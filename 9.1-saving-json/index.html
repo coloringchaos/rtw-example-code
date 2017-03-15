@@ -1,0 +1,80 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <!-- to get rid of favicon request in console -->
+  <link rel="shortcut icon" href="">
+
+  <!-- set viewport - for responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- SOCKET STUFF -->
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+  <script type="text/javascript">
+    
+    /// SOCKET STUFF - comment in to use socket
+    var socket = io.connect();
+    
+    socket.on('connect', function() {
+      console.log("Connected");
+
+      //when connection happens, send an event to the server to requst the data
+      socket.emit('getArray');
+    });
+
+    // listen for the data being sent from the server
+    // this event was initiated on connection (see 'connect' event)
+    socket.on('getArray', function(data){
+      words = data;
+      console.log("got Array when I connected")
+      console.log(words);
+      showWords();
+    });
+
+    // somebody submitted a word and the array of words was updated
+    // receive the updated data from the server
+    socket.on('allWords', function(data){
+      console.log("array of words was updated");
+      words = data;
+      console.log(words);
+
+      // add a div to dislay the NEW word
+      document.getElementById("theContainer").innerHTML += ('<div class="fruit">'+words[words.length-1]+'</div>');
+    });
+
+  </script>
+
+  <style> 
+    body{
+    	font-family: monospace;
+    }
+    .fruit{
+      color:darkcyan;
+      line-height: 1.3em;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+	<p>what is your favorite fruit?</p>
+
+	<input type="text" id="myText" placeholder="my favorite fruit is...">
+
+	<button onclick="getText()">submit</button>
+
+  <br><br>
+
+  <div id="theContainer"></div>
+
+  <script language="javascript" type="text/javascript" src="sketch.js"></script>
+
+
+</body>
+</html>
+
+
+
