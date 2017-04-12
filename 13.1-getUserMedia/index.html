@@ -1,0 +1,99 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <!-- to get rid of favicon request in console -->
+  <link rel="shortcut icon" href="">
+
+  <!-- SOCKET STUFF -->
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+  <script type="text/javascript">
+    
+    /// SOCKET STUFF
+    var socket = io.connect();
+    
+    socket.on('connect', function() {
+      console.log("Connected");
+    });
+
+    //draws image received from the server to 'imagefile' id
+    socket.on('image', function(data){
+      console.log('got an image: ' + data);
+      document.getElementById('imagefile').src = data;
+    });
+
+    //all of our WebRTC stuff in here!
+    function initWebRTC(){
+
+      //best practice for cross-browser
+      //also for cross-browser functionality
+      window.URL = window.URL || window.webkitURL || window.mozURL;
+
+      //for cross browser compatability, get user media for multiple platforms
+      //this is a shim
+      navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+      //video element on the page to display the webcam
+      var video = document.getElementById('thevideo');
+
+      //if we have a media stream...
+      if(navigator.getUserMedia){
+        navigator.getUserMedia({video:true}, function(stream){
+          //this actually plays the video
+          video.src = window.URL.createObjectURL(stream) || stream;
+          video.play();
+        }, function(error) {alert("Failure"+ error.code);});
+      }
+
+      //draw still frames to the screen
+      var thecanvas = document.getElementById('thecanvas');
+      var thecontext = thecanvas.getContext('2d');
+
+      //draw the video to the canvas
+      function draw(){
+        thecontext.drawImage(video, 0, 0, video.width, video.height);
+        //making a URI containing each still image
+        //webp is a lossless compression type
+        var dataURL = thecanvas.toDataURL('image/webp', 1);
+
+        //draw to the id on our index
+        // document.getElementById('imagefile').src = dataURL;
+
+        //emit to the server
+        socket.emit('image', dataURL);
+
+        //call draw every 3 seconds
+        setTimeout(draw, 3000);
+      }
+
+      draw();
+
+
+    } //end of initWebRTC function
+
+    //call function on page load
+    window.addEventListener('load', initWebRTC);
+
+  </script>
+
+  <style> body {padding: 0; margin: 0;}</style>
+</head>
+
+<body>
+  <p>Local Video:</p>
+  <video id='thevideo' width='320' height='240' autoplay></video>
+  <br>
+
+  <p>Canvas:</p>
+  <canvas id="thecanvas" width='320' height='240'></canvas>
+
+  <!-- image is what is received from the server -->
+  <p>Image:</p>
+  <img src="" id="imagefile">
+
+</body>
+</html>
+
+
+
