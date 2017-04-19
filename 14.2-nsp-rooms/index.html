@@ -1,0 +1,62 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <!-- to get rid of favicon request in console -->
+  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+
+  <!-- SOCKET STUFF -->
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+  <script type="text/javascript">
+    
+    /// OUR DEFAULT SOCKET STUFF
+    // var socket = io.connect();
+    // var socket = io('/my-room');
+    
+    // socket.on('connect', function() {
+    //   console.log("Connected");
+    // });
+
+    // set-up a connection between the client and the server
+    var socket = io.connect();
+
+    // let's assume that the client page, once rendered, knows what room it wants to join
+    var room = "abc123";
+
+    //connection happens when page loads
+    socket.on('connect', function() {
+       // Connected, let's sign-up for to receive messages for this room
+       // socket.emit('room', room); //we can join the room on connection, or later
+    });
+
+    socket.on('message', function(data) {
+      console.log(data);
+    });
+    socket.on('reply', function(data){
+      console.log(data);
+    });
+
+    function joinRoom(){
+      socket.emit('room', room);
+      console.log('joining room');
+    }
+    function sendMsg(data){
+      console.log("sending message");
+      socket.emit('something');
+    }
+    
+
+  </script>
+</head>
+
+<body>
+  <button type="button" onClick="joinRoom()">Join Room</button>
+  <br>
+  <br>
+  <button type="button" onClick="sendMsg()">Send Message</button>
+</body>
+</html>
+
+
+
